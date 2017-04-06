@@ -9,29 +9,108 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/chart-elements/chart-elements.html"
+<!--<link rel="import" href="shared-styles.html">-->
 
 <dom-module id="my-view1">
   <template>
-    <style include="shared-styles">
-      :host {
-        display: block;
+      <chart-pie id="chart" class="square-chart" data="[[data]]"></chart-pie>
 
-        padding: 10px;
-      }
-    </style>
+      <div class="controls">
 
-    <div class="card">
-      <div class="circle">1</div>
-      <h1>View One</h1>
-      <p>Ut labores minimum atomorum pro. Laudem tibique ut has.</p>
-      <p>Lorem ipsum dolor sit amet, per in nusquam nominavi periculis, sit elit oportere ea.Lorem ipsum dolor sit amet, per in nusquam nominavi periculis, sit elit oportere ea.Cu mei vide viris gloriatur, at populo eripuit sit.</p>
-    </div>
+        <div class="control-group">
+
+          <label>
+            Value
+            <input id="newValue" type="text" value="200">
+          </label>
+
+          <label>
+            Color
+            <input id="newColor" type="text" value="#949FB1">
+          </label>
+
+          <label>
+            Highlight
+            <input id="newHighlight" type="text" value="#A8B3C5">
+          </label>
+
+          <label>
+            Label
+            <input id="newLabel" type="text" value="Grey">
+          </label>
+
+          <button type="button" name="button" on-tap="addData">Add data</button>
+          <paper-button raised>raised</paper-button>
+
+        </div>
+
+        <div class="control-group">
+
+          <label>
+            Width
+            <input id="newWidth" type="text" value="150px">
+          </label>
+
+          <label>
+            Height
+            <input id="newHeight" type="text" value="150px">
+          </label>
+
+          <button type="button" name="button" on-tap="resize">Resize</button>
+
+        </div>
+
+      </div>
+
   </template>
 
   <script>
-    Polymer({
+    Polymer({ 
       is: 'my-view1',
+      addData: function() {
+         var scope = document.querySelector('#chart');
+         scope.push('data.labels', this.$.newLabel.value);
+        scope.push('data.datasets.0.hoverBackgroundColor', this.$.newHighlight.value);
+        scope.push('data.datasets.0.backgroundColor', this.$.newColor.value);
+        scope.push('data.datasets.0.data', this.$.newValue.value);
+      }
+
     });
+     var scope = document.querySelector('#chart');
+    //  console.log("Message here")
+    //  console.log(scope)
+      scope.data = {
+        labels: [
+          "Red",
+          "Green",
+          "Yellow"
+        ],
+        datasets: [
+          {
+            data: [300, 50, 100],
+            backgroundColor: [
+              "#FF6384",
+              "#36A2EB",
+              "#FFCE56"
+            ],
+            hoverBackgroundColor: [
+              "#FF6384",
+              "#36A2EB",
+              "#FFCE56"
+            ]
+          }]
+      };
+
+        scope.addData = function() {
+       
+      };
+
+      scope.resize = function() {
+        this.$.chart.style.width = this.$.newWidth.value;
+        this.$.chart.style.height = this.$.newHeight.value;
+        this.$.chart.resize();
+      };
+
   </script>
 </dom-module>
