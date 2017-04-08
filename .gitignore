@@ -1,0 +1,6 @@
+webapi/NuxeoWebApiConnect2/bin/*
+webapi/packages/*
+webapi/NuxeoWebApiConnect2/obj/*
+webapi/.vs/NuxeoRestApiConnect/v14/.suo
+webapi/.vs/NuxeoRestApiConnect/v15/.suo
+webapi/.vs/NuxeoWebApiConnect2/v15/.suo
