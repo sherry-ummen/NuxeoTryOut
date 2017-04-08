@@ -9,77 +9,78 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/chart-elements/chart-elements.html"
-<!--<link rel="import" href="shared-styles.html">-->
-
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/chart-elements/chart-elements.html" <!--<link rel="import" href="shared-styles.html">-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
 <dom-module id="my-view1">
   <template>
-      <chart-pie id="chart" class="square-chart" data="[[data]]"></chart-pie>
+    <chart-pie id="chart" class="square-chart" data="[[data]]"></chart-pie>
 
-      <div class="controls">
+    <div class="controls">
 
-        <div class="control-group">
+      <div class="control-group">
 
-          <label>
+        <label>
             Value
             <input id="newValue" type="text" value="200">
           </label>
 
-          <label>
+        <label>
             Color
             <input id="newColor" type="text" value="#949FB1">
           </label>
 
-          <label>
+        <label>
             Highlight
             <input id="newHighlight" type="text" value="#A8B3C5">
           </label>
 
-          <label>
+        <label>
             Label
             <input id="newLabel" type="text" value="Grey">
           </label>
 
-          <button type="button" name="button" on-tap="addData">Add data</button>
-          <paper-button raised>raised</paper-button>
+        <button type="button" name="button" on-tap="addData">Add data</button>
+        <paper-button raised>raised</paper-button>
 
-        </div>
+      </div>
 
-        <div class="control-group">
+      <div class="control-group">
 
-          <label>
+        <label>
             Width
             <input id="newWidth" type="text" value="150px">
           </label>
 
-          <label>
+        <label>
             Height
             <input id="newHeight" type="text" value="150px">
           </label>
 
-          <button type="button" name="button" on-tap="resize">Resize</button>
-
-        </div>
+        <button type="button" name="button" on-tap="resize">Resize</button>
 
       </div>
 
+    </div>
+    <!--<iron-ajax id="requestRepos" method="GET" handle-as="json"  url="http://localhost:55911/api/values" on-response="handleResponse">-->
+
+    <div>
+      <paper-material class="demo-paper" style="height: 300px; overflow: auto;">
+        <p>An example of <code>&lt;paper-input-autocomplete-chips&gt;</code>:</p>
+        <paper-input-autocomplete-chips local-candidates="{{states}}" label="Chips">
+          <!--<iron-icon icon="visibility" prefix></iron-icon>
+          <iron-icon icon="visibility" suffix></iron-icon>-->
+        </paper-input-autocomplete-chips>
+      </paper-material>
+    </div>
+    </iron-ajax>
   </template>
 
   <script>
-    Polymer({ 
-      is: 'my-view1',
-      addData: function() {
-         var scope = document.querySelector('#chart');
-         scope.push('data.labels', this.$.newLabel.value);
-        scope.push('data.datasets.0.hoverBackgroundColor', this.$.newHighlight.value);
-        scope.push('data.datasets.0.backgroundColor', this.$.newColor.value);
-        scope.push('data.datasets.0.data', this.$.newValue.value);
-      }
-
-    });
-     var scope = document.querySelector('#chart');
-    //  console.log("Message here")
-    //  console.log(scope)
+    function initializechart() {
+      var scope = document.querySelector('#chart');
+      //  console.log("Message here")
+      //  console.log(scope)
       scope.data = {
         labels: [
           "Red",
@@ -102,15 +103,55 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }]
       };
 
-        scope.addData = function() {
-       
-      };
-
-      scope.resize = function() {
+      scope.resize = function () {
         this.$.chart.style.width = this.$.newWidth.value;
         this.$.chart.style.height = this.$.newHeight.value;
         this.$.chart.resize();
       };
+    }
 
+
+    function showResult(json) {
+      alert(json);
+    }
+    Polymer({
+      is: 'my-view1',
+      ready: function () {
+        console.log("Called")
+        // document.querySelector("#requestRepos").generateRequest();
+        initializechart();
+
+        $.ajax({
+          type: 'GET',
+          dataType: 'jsonp',
+          url: 'http://localhost:53145/api/nuxeoconnect',
+          jsonpCallback: 'showResult',
+          error: function (data, msg) {
+            alert("Error");
+            alert(msg);
+          },
+          success: function (data) {
+            alert('success')
+            console.log(data)
+          },
+        });
+
+        //return false;
+      },
+      handleResponse: function (data) {
+        console.log("Data here")
+        console.log(data.detail)
+        this.repos = data.detail.response;
+
+      },
+      addData: function () {
+        var scope = document.querySelector('#chart');
+        scope.push('data.labels', this.$.newLabel.value);
+        scope.push('data.datasets.0.hoverBackgroundColor', this.$.newHighlight.value);
+        scope.push('data.datasets.0.backgroundColor', this.$.newColor.value);
+        scope.push('data.datasets.0.data', this.$.newValue.value);
+      }
+
+    });
   </script>
 </dom-module>
