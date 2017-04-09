@@ -17,30 +17,6 @@ using Authorization = NuxeoClient.Authorization;
 
 namespace NuxeoWebApiConnect2.Controllers {
 
-    //public class JsonContent : HttpContent {
-
-    //    private readonly MemoryStream _Stream = new MemoryStream();
-    //    public JsonContent(object value) {
-
-    //        Headers.ContentType = new MediaTypeHeaderValue("application/json");
-    //        var jw = new JsonTextWriter(new StreamWriter(_Stream));
-    //        jw.Formatting = Formatting.Indented;
-    //        var serializer = new JsonSerializer();
-    //        serializer.Serialize(jw, value);
-    //        jw.Flush();
-    //        _Stream.Position = 0;
-
-    //    }
-    //    protected override Task SerializeToStreamAsync(Stream stream, TransportContext context) {
-    //        return _Stream.CopyToAsync(stream);
-    //    }
-
-    //    protected override bool TryComputeLength(out long length) {
-    //        length = _Stream.Length;
-    //        return true;
-    //    }
-    //}
-
     public class QueryPostData {
         public IEnumerable<string> Regions { get; set; }
         public IEnumerable<string> Subjects { get; set; }
@@ -63,11 +39,6 @@ namespace NuxeoWebApiConnect2.Controllers {
         private static string[] Regions = new[] {
             "asia", "africa", "europe", "antartica"
         };
-
-        [System.Web.Http.HttpGet]
-        public IEnumerable<string> Coverage() {
-            return Regions;
-        }
 
         [System.Web.Http.HttpGet]
         public ChartData ChartData() {

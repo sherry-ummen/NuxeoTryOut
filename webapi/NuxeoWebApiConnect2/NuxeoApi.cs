@@ -27,19 +27,17 @@ namespace NuxeoWebApiConnect2 {
                 Document mainFolder = (Document)_client.DocumentFromUid(_uuid).Get().Result;
 
                 Adapter adapter = new SearchAdapter().SetSearchMode(SearchAdapter.SearchMode.NXQL)
-                    .SetSearchQuery("SELECT * FROM DOCUMENT WHERE ecm:parentId = \"" + mainFolder.Uid + "\"");
-                //.SetSearchQuery("SELECT * FROM DOCUMENT WHERE ecm:parentId = \"" + mainFolder.Uid + "\" AND dc:subjects IN ('art', 'sciences')");
-                //.SetSearchQuery("SELECT * FROM DOCUMENT WHERE dc:subjects IN ('art', 'sciences')");
+                    .SetSearchQuery("SELECT * FROM DOCUMENT WHERE ecm:parentId = \"" + mainFolder.Uid + "\"")
+                    .SetPageSize(Int32.MaxValue.ToString() /*This will blow up. Get pagination logic done*/);
 
                 Documents documents = (Documents)mainFolder.SetAdapter(adapter).Get().Result;
 
                 foreach (var document in documents.Entries.Where(x => x.Properties.Keys.Any(z => z == "dc:nature"))) {
-                    foreach (var value in document.Properties["dc:subjects"].Value<JToken>().Values<string>()) {
-                        if (!chartvalues.ContainsKey(value)) {
-                            chartvalues[value] = 1;
-                        } else {
-                            chartvalues[value] += 1;
-                        }
+                    string value = document.Properties["dc:nature"].Value<string>();
+                    if (!chartvalues.ContainsKey(value)) {
+                        chartvalues[value] = 1;
+                    } else {
+                        chartvalues[value] += 1;
                     }
                 }
 
@@ -60,21 +58,19 @@ namespace NuxeoWebApiConnect2 {
                 Document mainFolder = (Document)_client.DocumentFromUid(_uuid).Get().Result;
 
                 Adapter adapter = new SearchAdapter().SetSearchMode(SearchAdapter.SearchMode.NXQL)
-                //.SetSearchQuery("SELECT * FROM DOCUMENT WHERE ecm:parentId = \"" + mainFolder.Uid + "\"");
                 .SetSearchQuery($"SELECT * FROM DOCUMENT WHERE ecm:parentId =\"{mainFolder.Uid}\" AND " +
                                 $"dc:subjects IN ({ArraySqlToQueryString(data.Subjects)}) AND " +
-                                $"dc:coverage IN ({ArraySqlToQueryString(data.Regions)})");
-                //.SetSearchQuery("SELECT * FROM DOCUMENT WHERE dc:subjects IN ('art', 'sciences')");
+                                $"dc:coverage IN ({ArraySqlToQueryString(data.Regions)})")
+                .SetPageSize(Int32.MaxValue.ToString() /*This will blow up. Get pagination logic done*/);
 
                 Documents documents = (Documents)mainFolder.SetAdapter(adapter).Get().Result;
 
                 foreach (var document in documents.Entries.Where(x => x.Properties.Keys.Any(z => z == "dc:nature"))) {
-                    foreach (var value in document.Properties["dc:subjects"].Value<JToken>().Values<string>()) {
-                        if (!chartvalues.ContainsKey(value)) {
-                            chartvalues[value] = 1;
-                        } else {
-                            chartvalues[value] += 1;
-                        }
+                    string value = document.Properties["dc:nature"].Value<string>();
+                    if (!chartvalues.ContainsKey(value)) {
+                        chartvalues[value] = 1;
+                    } else {
+                        chartvalues[value] += 1;
                     }
                 }
 
