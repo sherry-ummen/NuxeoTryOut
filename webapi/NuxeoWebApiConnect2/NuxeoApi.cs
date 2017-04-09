@@ -14,7 +14,7 @@ namespace NuxeoWebApiConnect2 {
 
         private static Client _client = null;
         private static Random rnd = new Random();
-        private static string _uuid = "c1e1874e-142e-4aa4-acb4-c7f1fca1dfad";
+        private static string _uuid = "67fe66cd-1d38-405e-862f-4a26f37f67cd";
         static NuxeoApi() {
             _client = new Client("http://localhost:8080/nuxeo/", new Authorization("Administrator", "Administrator"));
             _client.AddDefaultSchema("dublincore");
