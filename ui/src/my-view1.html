@@ -29,11 +29,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <!--<paper-material class="demo-paper" style="height: 300px; overflow: auto;">-->
       <!--<p>An example of <code>&lt;paper-input-autocomplete-chips&gt;</code>:</p>-->
       <paper-input-autocomplete-chips local-candidates="{{regions}}" label="Continents"></paper-input-autocomplete-chips>
-        <paper-input-autocomplete-chips local-candidates="{{nature}}" label="Nature"></paper-input-autocomplete-chips>
-          <paper-input-autocomplete-chips local-candidates="{{subject}}" label="Subjects"></paper-input-autocomplete-chips>
-            <!--<iron-icon icon="visibility" prefix></iron-icon>
+      <paper-input-autocomplete-chips local-candidates="{{nature}}" label="Nature"></paper-input-autocomplete-chips>
+      <paper-input-autocomplete-chips local-candidates="{{subject}}" label="Subjects"></paper-input-autocomplete-chips>
+      <!--<iron-icon icon="visibility" prefix></iron-icon>
           <iron-icon icon="visibility" suffix></iron-icon>-->
-          <!--</paper-material>-->
+      <!--</paper-material>-->
     </div>
     </iron-ajax>
   </template>
@@ -57,69 +57,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     function initializechart() {
-      var scope = document.querySelector('#chart');
-      //  console.log("Message here")
-      //  console.log(scope)
-      scope.data = {
-        labels: [
-          "Red",
-          "Green",
-          "Yellow"
-        ],
-        datasets: [
-          {
-            data: [300, 50, 100],
-            backgroundColor: [
-              "#FF6384",
-              "#36A2EB",
-              "#FFCE56"
-            ],
-            hoverBackgroundColor: [
-              "#FF6384",
-              "#36A2EB",
-              "#FFCE56"
-            ]
-          }]
-      };
-
-      scope.resize = function () {
-        this.$.chart.style.width = this.$.newWidth.value;
-        this.$.chart.style.height = this.$.newHeight.value;
-        this.$.chart.resize();
-      };
-    }
-
-    function setSuggestions() {
       $.ajax({
         type: 'GET',
         dataType: 'jsonp',
-        url: 'http://localhost:53145/api/nuxeoconnect/coverage',
-        jsonpCallback: 'showResult',
+        url: 'http://localhost:53145/api/nuxeoconnect/chartdata',
+        // jsonpCallback: 'showResult',
         error: function (data, msg) {
-          alert("Error");
+          alert("Error suggestion");
           alert(msg);
         },
         success: function (data) {
-          console.log(data)
-          array = [];
-          for (var r in data) {
-            var item = {
-              key: r,
-              text: data[r],
-              inactive: true
-            };
-            array.push(item)
-          }
-          // this.set("myarray",array);
-          this.myarray = array;
-          this.notifyPath('myarray', this.myarray)
-          alert(array.toSource());
-          alert(this.myArray.toSource());
+          var scope = document.querySelector('#chart');
+          //  console.log("Message here")
+          //  console.log(scope)
+          scope.data = {
+            labels: data.labels,
+            datasets: [
+              {
+                data: data.data,
+                backgroundColor: data.backgroundColor,
+                hoverBackgroundColor: data.backgroundColor
+              }]
+          };
         }
       });
     }
 
     function showResult(json) {
+      alert('Called')
       alert(json);
     }
     Polymer({
@@ -140,24 +105,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
       ready: function () {
         console.log("Called")
-        // document.querySelector("#requestRepos").generateRequest();
         initializechart();
-        // setSuggestions();
-        // $.ajax({
-        //   type: 'GET',
-        //   dataType: 'jsonp',
-        //   url: 'http://localhost:53145/api/nuxeoconnect',
-        //   jsonpCallback: 'showResult',
-        //   error: function (data, msg) {
-        //     alert("Error");
-        //     alert(msg);
-        //   },
-        //   success: function (data) {
-        //     alert('success')
-        //     console.log(data)
-        //   }
-        // });
-        //return false;
       }
     });
   </script>
