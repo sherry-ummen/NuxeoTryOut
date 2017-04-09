@@ -21,7 +21,7 @@ namespace NuxeoWebApiConnect2 {
         }
 
         public static ChartData GetChartDataAll() {
-            Dictionary<string, int> chartvalues = new Dictionary<string, int>();
+            Documents documents = null;
             //Getting the document
             Task.Run(async () => {
                 Document mainFolder = (Document)_client.DocumentFromUid(_uuid).Get().Result;
@@ -30,29 +30,13 @@ namespace NuxeoWebApiConnect2 {
                     .SetSearchQuery("SELECT * FROM DOCUMENT WHERE ecm:parentId = \"" + mainFolder.Uid + "\"")
                     .SetPageSize(Int32.MaxValue.ToString() /*This will blow up. Get pagination logic done*/);
 
-                Documents documents = (Documents)mainFolder.SetAdapter(adapter).Get().Result;
-
-                foreach (var document in documents.Entries.Where(x => x.Properties.Keys.Any(z => z == "dc:nature"))) {
-                    string value = document.Properties["dc:nature"].Value<string>();
-                    if (!chartvalues.ContainsKey(value)) {
-                        chartvalues[value] = 1;
-                    } else {
-                        chartvalues[value] += 1;
-                    }
-                }
-
+                documents = (Documents)mainFolder.SetAdapter(adapter).Get().Result;
             }).Wait();
-            chartvalues = chartvalues.OrderBy(x => x.Value).ToDictionary(pair => pair.Key, pair => pair.Value);
-            return new ChartData() {
-                Labels = chartvalues.Keys,
-                Data = chartvalues.Values,
-                BackgroundColor = Lighten(Color.DodgerBlue, chartvalues.Count).ToArray()
-            };
-
+            return GetChartData(documents);
         }
 
         public static ChartData Query(QueryPostData data) {
-            Dictionary<string, int> chartvalues = new Dictionary<string, int>();
+            Documents documents = null;
             //Getting the document
             Task.Run(async () => {
                 Document mainFolder = (Document)_client.DocumentFromUid(_uuid).Get().Result;
@@ -63,18 +47,22 @@ namespace NuxeoWebApiConnect2 {
                                 $"dc:coverage IN ({ArraySqlToQueryString(data.Regions)})")
                 .SetPageSize(Int32.MaxValue.ToString() /*This will blow up. Get pagination logic done*/);
 
-                Documents documents = (Documents)mainFolder.SetAdapter(adapter).Get().Result;
-
-                foreach (var document in documents.Entries.Where(x => x.Properties.Keys.Any(z => z == "dc:nature"))) {
-                    string value = document.Properties["dc:nature"].Value<string>();
-                    if (!chartvalues.ContainsKey(value)) {
-                        chartvalues[value] = 1;
-                    } else {
-                        chartvalues[value] += 1;
-                    }
-                }
-
+                documents = (Documents)mainFolder.SetAdapter(adapter).Get().Result;
             }).Wait();
+            return GetChartData(documents);
+        }
+
+        private static ChartData GetChartData(Documents documents) {
+            if (documents == null) return new ChartData();
+            Dictionary<string, int> chartvalues = new Dictionary<string, int>();
+            foreach (var document in documents.Entries.Where(x => x.Properties.Keys.Any(z => z == "dc:nature"))) {
+                string value = document.Properties["dc:nature"].Value<string>();
+                if (!chartvalues.ContainsKey(value)) {
+                    chartvalues[value] = 1;
+                } else {
+                    chartvalues[value] += 1;
+                }
+            }
             chartvalues = chartvalues.OrderBy(x => x.Value).ToDictionary(pair => pair.Key, pair => pair.Value);
             return new ChartData() {
                 Labels = chartvalues.Keys,
