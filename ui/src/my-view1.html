@@ -8,8 +8,10 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
 <dom-module id="my-view1">
   <template id="app">
-    <chart-pie id="chart" class="square-chart" data="[[data]]"></chart-pie>
-    <div>
+    <div style="width:50%;margin: 0 auto">
+      <div style="width:50%;margin: 0 auto">
+        <chart-pie id="chart" class="square-chart" data="[[data]]"></chart-pie>
+      </div>
       <paper-input-autocomplete-chips id="autocompleteregions" local-candidates="{{regions}}" label="Continents"></paper-input-autocomplete-chips>
       <paper-input-autocomplete-chips id="autocompletesubjects" local-candidates="{{subject}}" label="Subjects"></paper-input-autocomplete-chips>
       <paper-dropdown-menu id="dropdown" label="Language">
@@ -20,7 +22,9 @@
         </paper-menu>
       </paper-dropdown-menu>
       <div style="margin-top:45px"></div>
-      <paper-icon-button icon="search" title="heart" class="pink" on-tap="onclick"></paper-icon-button>
+      <div style="width:20%;margin: 0 auto">
+        <paper-icon-button icon="search" title="heart" class="pink" on-tap="onclick"></paper-icon-button>
+      </div>
     </div>
     </iron-ajax>
   </template>
