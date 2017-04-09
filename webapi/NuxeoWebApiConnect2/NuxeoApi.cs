@@ -22,34 +22,33 @@ namespace NuxeoWebApiConnect2 {
 
         public static ChartData GetChartDataAll() {
             Documents documents = null;
-            //Getting the document
             Task.Run(async () => {
                 Document mainFolder = (Document)_client.DocumentFromUid(_uuid).Get().Result;
-
-                Adapter adapter = new SearchAdapter().SetSearchMode(SearchAdapter.SearchMode.NXQL)
-                    .SetSearchQuery("SELECT * FROM DOCUMENT WHERE ecm:parentId = \"" + mainFolder.Uid + "\"")
-                    .SetPageSize(Int32.MaxValue.ToString() /*This will blow up. Get pagination logic done*/);
-
-                documents = (Documents)mainFolder.SetAdapter(adapter).Get().Result;
+                documents = (Documents)mainFolder
+                .SetAdapter(GetSearchAdapter($"SELECT * FROM DOCUMENT WHERE ecm:parentId = \"{mainFolder.Uid}\""))
+                .Get().Result;
             }).Wait();
             return GetChartData(documents);
         }
 
         public static ChartData Query(QueryPostData data) {
             Documents documents = null;
-            //Getting the document
             Task.Run(async () => {
                 Document mainFolder = (Document)_client.DocumentFromUid(_uuid).Get().Result;
-
-                Adapter adapter = new SearchAdapter().SetSearchMode(SearchAdapter.SearchMode.NXQL)
-                .SetSearchQuery($"SELECT * FROM DOCUMENT WHERE ecm:parentId =\"{mainFolder.Uid}\" AND " +
-                                $"dc:subjects IN ({ArraySqlToQueryString(data.Subjects)}) AND " +
-                                $"dc:coverage IN ({ArraySqlToQueryString(data.Regions)})")
-                .SetPageSize(Int32.MaxValue.ToString() /*This will blow up. Get pagination logic done*/);
-
-                documents = (Documents)mainFolder.SetAdapter(adapter).Get().Result;
+                documents = (Documents)mainFolder
+                .SetAdapter(GetSearchAdapter(
+                    $"SELECT * FROM DOCUMENT WHERE ecm:parentId =\"{mainFolder.Uid}\" AND " +
+                    $"dc:subjects IN ({ArraySqlToQueryString(data.Subjects)}) AND " +
+                    $"dc:coverage IN ({ArraySqlToQueryString(data.Regions)})")).Get().Result;
             }).Wait();
             return GetChartData(documents);
+        }
+
+        private static Adapter GetSearchAdapter(string query) {
+            Adapter adapter = new SearchAdapter().SetSearchMode(SearchAdapter.SearchMode.NXQL)
+                .SetSearchQuery(query)
+                .SetPageSize(Int32.MaxValue.ToString() /*This will blow up. Get pagination logic done*/);
+            return adapter;
         }
 
         private static ChartData GetChartData(Documents documents) {
