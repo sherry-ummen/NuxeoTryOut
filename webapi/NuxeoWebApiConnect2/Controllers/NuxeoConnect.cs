@@ -11,33 +11,40 @@ using System.Web.Http.Results;
 using System.Web.Mvc;
 using Microsoft.Ajax.Utilities;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NuxeoClient;
 using Authorization = NuxeoClient.Authorization;
 
 namespace NuxeoWebApiConnect2.Controllers {
 
-    public class JsonContent : HttpContent {
+    //public class JsonContent : HttpContent {
 
-        private readonly MemoryStream _Stream = new MemoryStream();
-        public JsonContent(object value) {
+    //    private readonly MemoryStream _Stream = new MemoryStream();
+    //    public JsonContent(object value) {
 
-            Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            var jw = new JsonTextWriter(new StreamWriter(_Stream));
-            jw.Formatting = Formatting.Indented;
-            var serializer = new JsonSerializer();
-            serializer.Serialize(jw, value);
-            jw.Flush();
-            _Stream.Position = 0;
+    //        Headers.ContentType = new MediaTypeHeaderValue("application/json");
+    //        var jw = new JsonTextWriter(new StreamWriter(_Stream));
+    //        jw.Formatting = Formatting.Indented;
+    //        var serializer = new JsonSerializer();
+    //        serializer.Serialize(jw, value);
+    //        jw.Flush();
+    //        _Stream.Position = 0;
 
-        }
-        protected override Task SerializeToStreamAsync(Stream stream, TransportContext context) {
-            return _Stream.CopyToAsync(stream);
-        }
+    //    }
+    //    protected override Task SerializeToStreamAsync(Stream stream, TransportContext context) {
+    //        return _Stream.CopyToAsync(stream);
+    //    }
 
-        protected override bool TryComputeLength(out long length) {
-            length = _Stream.Length;
-            return true;
-        }
+    //    protected override bool TryComputeLength(out long length) {
+    //        length = _Stream.Length;
+    //        return true;
+    //    }
+    //}
+
+    public class QueryPostData {
+        public IEnumerable<string> Regions { get; set; }
+        public IEnumerable<string> Subjects { get; set; }
+        public string Language { get; set; }
     }
 
     public class Test {
@@ -77,8 +84,10 @@ namespace NuxeoWebApiConnect2.Controllers {
             return "value";
         }
 
+        [System.Web.Http.HttpGet]
         // POST api/values
-        public void Post([FromBody]string value) {
+        public ChartData Post(string data) {
+            return data != null ? NuxeoApi.Query(JObject.Parse(data).ToObject<QueryPostData>()) : null;
         }
 
         // PUT api/values/5
