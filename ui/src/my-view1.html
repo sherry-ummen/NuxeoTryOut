@@ -13,59 +13,49 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/chart-elements/chart-elements.html">
 <link rel="import" href="../bower_components/paper-input-autocomplete-chips/paper-input-autocomplete-chips.html">
 <link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../brower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../bower_components/paper-input-autocomplete/paper-input-autocomplete.html">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
 <dom-module id="my-view1">
-  <template>
+  <template id="app">
     <chart-pie id="chart" class="square-chart" data="[[data]]"></chart-pie>
-
-    <div class="controls">
-      <div class="control-group">
-        <label>
-            Value
-            <input id="newValue" type="text" value="200">
-          </label>
-        <label>
-            Color
-            <input id="newColor" type="text" value="#949FB1">
-          </label>
-        <label>
-            Highlight
-            <input id="newHighlight" type="text" value="#A8B3C5">
-          </label>
-        <label>
-            Label
-            <input id="newLabel" type="text" value="Grey">
-          </label>
-        <button type="button" name="button" on-tap="addData">Add data</button>
-        <paper-button raised>raised</paper-button>
-      </div>
-      <div class="control-group">
-        <label>
-            Width
-            <input id="newWidth" type="text" value="150px">
-          </label>
-        <label>
-            Height
-            <input id="newHeight" type="text" value="150px">
-          </label>
-        <button type="button" name="button" on-tap="resize">Resize</button>
-      </div>
-    </div>
     <!--<iron-ajax id="requestRepos" method="GET" handle-as="json"  url="http://localhost:55911/api/values" on-response="handleResponse">-->
+    <!--<iron-ajax auto url="http://localhost:53145/api/nuxeoconnect/coverage" handle-as="json" last-response="{{ajaxResponse}}"></iron-ajax>-->
+    <!--<template is="dom-repeat" items="[[ajaxResponse]]">
+      <span>{{item}}</span>
+    </template>-->
+
     <div>
       <!--<paper-material class="demo-paper" style="height: 300px; overflow: auto;">-->
-        <p>An example of <code>&lt;paper-input-autocomplete-chips&gt;</code>:</p>
-        <paper-input-autocomplete-chips  label="Chips">
-          <!--<iron-icon icon="visibility" prefix></iron-icon>
+      <!--<p>An example of <code>&lt;paper-input-autocomplete-chips&gt;</code>:</p>-->
+      <paper-input-autocomplete-chips local-candidates="{{regions}}" label="Continents"></paper-input-autocomplete-chips>
+        <paper-input-autocomplete-chips local-candidates="{{nature}}" label="Nature"></paper-input-autocomplete-chips>
+          <paper-input-autocomplete-chips local-candidates="{{subject}}" label="Subjects"></paper-input-autocomplete-chips>
+            <!--<iron-icon icon="visibility" prefix></iron-icon>
           <iron-icon icon="visibility" suffix></iron-icon>-->
-        </paper-input-autocomplete-chips>
-      <!--</paper-material>-->
+          <!--</paper-material>-->
     </div>
     </iron-ajax>
   </template>
 
   <script>
+    regions = ["asia", "africa", "europe", "antartica"]
+    subjects = ["art", "sciences", "daily life", "human sciences", "society", "technology"]
+    nature = ["application", "article", "contract", "bankAccountDetails", "booklet", "letter", "loanApplication"]
+
+    function formAutoCompleteArray(array) {
+      returnArray = []
+      for (var key in array) {
+        var item = {
+          key: key,
+          text: array[key],
+          inactive: true
+        };
+        returnArray.push(item)
+      }
+      return returnArray;
+    }
+
     function initializechart() {
       var scope = document.querySelector('#chart');
       //  console.log("Message here")
@@ -99,31 +89,74 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       };
     }
 
+    function setSuggestions() {
+      $.ajax({
+        type: 'GET',
+        dataType: 'jsonp',
+        url: 'http://localhost:53145/api/nuxeoconnect/coverage',
+        jsonpCallback: 'showResult',
+        error: function (data, msg) {
+          alert("Error");
+          alert(msg);
+        },
+        success: function (data) {
+          console.log(data)
+          array = [];
+          for (var r in data) {
+            var item = {
+              key: r,
+              text: data[r],
+              inactive: true
+            };
+            array.push(item)
+          }
+          // this.set("myarray",array);
+          this.myarray = array;
+          this.notifyPath('myarray', this.myarray)
+          alert(array.toSource());
+          alert(this.myArray.toSource());
+        }
+      });
+    }
 
     function showResult(json) {
       alert(json);
     }
     Polymer({
       is: 'my-view1',
+      properties: {
+        regions: {
+          type: Array,
+          value: formAutoCompleteArray(regions),
+        },
+        nature: {
+          type: Array,
+          value: formAutoCompleteArray(nature),
+        },
+        subject: {
+          type: Array,
+          value: formAutoCompleteArray(subjects),
+        }
+      },
       ready: function () {
         console.log("Called")
         // document.querySelector("#requestRepos").generateRequest();
         initializechart();
-
-        $.ajax({
-          type: 'GET',
-          dataType: 'jsonp',
-          url: 'http://localhost:53145/api/nuxeoconnect',
-          jsonpCallback: 'showResult',
-          error: function (data, msg) {
-            alert("Error");
-            alert(msg);
-          },
-          success: function (data) {
-            alert('success')
-            console.log(data)
-          }
-        });
+        // setSuggestions();
+        // $.ajax({
+        //   type: 'GET',
+        //   dataType: 'jsonp',
+        //   url: 'http://localhost:53145/api/nuxeoconnect',
+        //   jsonpCallback: 'showResult',
+        //   error: function (data, msg) {
+        //     alert("Error");
+        //     alert(msg);
+        //   },
+        //   success: function (data) {
+        //     alert('success')
+        //     console.log(data)
+        //   }
+        // });
         //return false;
       }
     });
