@@ -1,13 +1,3 @@
-<!--
-@license
-Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
--->
-
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../bower_components/chart-elements/chart-elements.html">
@@ -19,21 +9,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="my-view1">
   <template id="app">
     <chart-pie id="chart" class="square-chart" data="[[data]]"></chart-pie>
-    <!--<iron-ajax id="requestRepos" method="GET" handle-as="json"  url="http://localhost:55911/api/values" on-response="handleResponse">-->
-    <!--<iron-ajax auto url="http://localhost:53145/api/nuxeoconnect/coverage" handle-as="json" last-response="{{ajaxResponse}}"></iron-ajax>-->
-    <!--<template is="dom-repeat" items="[[ajaxResponse]]">
-      <span>{{item}}</span>
-    </template>-->
-
     <div>
-      <!--<paper-material class="demo-paper" style="height: 300px; overflow: auto;">-->
-      <!--<p>An example of <code>&lt;paper-input-autocomplete-chips&gt;</code>:</p>-->
-      <paper-input-autocomplete-chips local-candidates="{{regions}}" label="Continents"></paper-input-autocomplete-chips>
-      <paper-input-autocomplete-chips local-candidates="{{nature}}" label="Nature"></paper-input-autocomplete-chips>
-      <paper-input-autocomplete-chips local-candidates="{{subject}}" label="Subjects"></paper-input-autocomplete-chips>
-      <!--<iron-icon icon="visibility" prefix></iron-icon>
-          <iron-icon icon="visibility" suffix></iron-icon>-->
-      <!--</paper-material>-->
+      <paper-input-autocomplete-chips id="autocompleteregions" local-candidates="{{regions}}" label="Continents"></paper-input-autocomplete-chips>
+      <paper-input-autocomplete-chips id="autocompletesubjects" local-candidates="{{subject}}" label="Subjects"></paper-input-autocomplete-chips>
+      <paper-dropdown-menu id="dropdown" label="Language">
+        <paper-menu attr-for-selected="value" selected="{{selected}}" class="dropdown-content">
+          <paper-item value="Finnish">Finnish</paper-item>
+          <paper-item value="French">French</paper-item>
+          <paper-item value="English">English</paper-item>
+        </paper-menu>
+      </paper-dropdown-menu>
+      <div style="margin-top:45px"></div>
+      <paper-icon-button icon="search" title="heart" class="pink" on-tap="onclick"></paper-icon-button>
     </div>
     </iron-ajax>
   </template>
@@ -42,7 +29,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     regions = ["asia", "africa", "europe", "antartica"]
     subjects = ["art", "sciences", "daily life", "human sciences", "society", "technology"]
     nature = ["application", "article", "contract", "bankAccountDetails", "booklet", "letter", "loanApplication"]
-
+    language = ["Finnish", "French", "English"]
     function formAutoCompleteArray(array) {
       returnArray = []
       for (var key in array) {
@@ -56,6 +43,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       return returnArray;
     }
 
+    function setChartData(data) {
+      var scope = document.querySelector('#chart');
+      //  console.log("Message here")
+      //  console.log(scope)
+      scope.data = {
+        labels: data.labels,
+        datasets: [
+          {
+            data: data.data,
+            backgroundColor: data.backgroundColor,
+            hoverBackgroundColor: data.backgroundColor
+          }]
+      };
+    }
+
     function initializechart() {
       $.ajax({
         type: 'GET',
@@ -63,30 +65,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         url: 'http://localhost:53145/api/nuxeoconnect/chartdata',
         // jsonpCallback: 'showResult',
         error: function (data, msg) {
-          alert("Error suggestion");
-          alert(msg);
+          alert("Error while initializing the chart");
         },
         success: function (data) {
-          var scope = document.querySelector('#chart');
-          //  console.log("Message here")
-          //  console.log(scope)
-          scope.data = {
-            labels: data.labels,
-            datasets: [
-              {
-                data: data.data,
-                backgroundColor: data.backgroundColor,
-                hoverBackgroundColor: data.backgroundColor
-              }]
-          };
+          setChartData(data)
         }
       });
     }
 
-    function showResult(json) {
-      alert('Called')
-      alert(json);
-    }
     Polymer({
       is: 'my-view1',
       properties: {
@@ -101,11 +87,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         subject: {
           type: Array,
           value: formAutoCompleteArray(subjects),
+        },
+        selected: {
+          type: String,
+          value: "Finnish"
         }
       },
       ready: function () {
-        console.log("Called")
         initializechart();
+      },
+      onclick: function () {
+        var postvalues = {
+          regions: this.$.autocompleteregions.selectedObjects.map(function (x) { return x.text }),
+          subjects: this.$.autocompletesubjects.selectedObjects.map(function (x) { return x.text }),
+          language: this.selected
+        }
+
+        var formURL = "http://localhost:53145/api/nuxeoconnect/post?data=" + JSON.stringify(postvalues);
+        $.ajax(
+          {
+            url: formURL,
+            type: 'GET',
+            dataType: 'jsonp',
+            success: function (data, textStatus, jqXHR) {
+              if (data == null || data.data.length == 0) {
+                alert("No Documents found. Please try different criteria.")
+              } else {
+                setChartData(data)
+              }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+              //if fails    
+              alert(errorThrown)
+            }
+          });
       }
     });
   </script>
